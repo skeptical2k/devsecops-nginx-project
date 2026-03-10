@@ -50,7 +50,7 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh 'curl -f http://localhost:8088'
+                sh 'curl -f http://localhost:8288'
             }
         }
     }
