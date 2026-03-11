@@ -38,15 +38,17 @@ pipeline {
                 sh '''
                 docker run --rm \
                   -v /var/run/docker.sock:/var/run/docker.sock \
-                  aquasec/trivy:latest image $FULL_IMAGE
+                  aquasec/trivy:latest image --exit-code 1 --severity HIGH,CRITICAL $FULL_IMAGE
                 '''
             }
         }
 
         stage('Deploy Container') {
             steps {
-                sh 'docker compose up -d --build nginx-app nginx-exporter prometheus grafana'
+                sh 'docker compose down || true'
+                sh 'docker rm -f nginx-app nginx-exporter prometheus grafana 2>/dev/null || true'
 
+                sh 'docker compose up -d --build nginx-app nginx-exporter prometheus grafana'
             }
         }
 
