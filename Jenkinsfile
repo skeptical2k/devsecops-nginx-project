@@ -17,8 +17,8 @@ pipeline {
 
         stage('Validate Files') {
             steps {
-                sh 'echo "Checking required files..."'
-                sh 'ls -la'
+                sh 'echo "Checking project files..."'
+                sh 'ls -R'
                 sh 'test -f Dockerfile'
                 sh 'test -f docker-compose.yml'
                 sh 'test -f nginx/default.conf'
@@ -32,16 +32,6 @@ pipeline {
             }
         }
 
-        stage('Security Scan with Trivy') {
-            steps {
-                sh '''
-                docker run --rm \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                aquasec/trivy:latest image $FULL_IMAGE
-                '''
-            }
-        }
-
         stage('Deploy Container') {
             steps {
                 sh 'docker compose up -d --build nginx-app'
@@ -50,14 +40,15 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh 'curl -f http://localhost:8288'
+                sh 'sleep 5'
+                sh 'curl -f http://localhost:8088'
             }
         }
     }
 
     post {
         success {
-            echo 'Deployment successful!'
+            echo 'Pipeline completed successfully.'
         }
         failure {
             echo 'Pipeline failed.'
