@@ -23,6 +23,7 @@ pipeline {
                 sh 'test -f docker-compose.yml'
                 sh 'test -f nginx/default.conf'
                 sh 'test -f html/index.html'
+                sh 'test -f prometheus/prometheus.yml'
             }
         }
 
@@ -32,9 +33,20 @@ pipeline {
             }
         }
 
+        stage('Security Scan with Trivy') {
+            steps {
+                sh '''
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  aquasec/trivy:latest image $FULL_IMAGE
+                '''
+            }
+        }
+
         stage('Deploy Container') {
             steps {
-                sh 'docker compose up -d --build nginx-app'
+                sh 'docker compose up -d --build nginx-app nginx-exporter prometheus grafana'
+
             }
         }
 
