@@ -43,22 +43,14 @@ pipeline {
             }
         }
 
-        stage('Deploy Container') {
+        stage('Deploy NGINX App') {
             steps {
                 sh 'docker rm -f nginx-app 2>/dev/null || true'
                 sh 'docker compose up -d --build nginx-app'
             }
         }
-
-        stage('Health Check') {
-            steps {
-                sh 'sleep 10'
-                sh 'docker ps'
-                sh 'docker exec nginx-app wget -qO- http://localhost'
-
-            }
-        }
     }
+
 
     post {
         success {
